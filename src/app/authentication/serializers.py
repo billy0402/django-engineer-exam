@@ -30,7 +30,23 @@ class AuthTokenSerializer(serializers.Serializer):
         return attrs
 
 
+class RoleSerializer(serializers.Serializer):
+    id = serializers.UUIDField(read_only=True)
+    nick_name = serializers.CharField(read_only=True)
+    create_at = serializers.DateTimeField(read_only=True)
+    update_at = serializers.DateTimeField(read_only=True)
+
+
 class UserSerializer(serializers.ModelSerializer):
+    role_info = serializers.SerializerMethodField(read_only=True)
+
+    def get_role_info(self, obj):
+        if obj.is_customer:
+            return RoleSerializer(obj.customer).data
+        elif obj.is_employee:
+            return RoleSerializer(obj.employee).data
+        return None
+
     def save(self, **kwargs):
         instance = super().save(**kwargs)
 

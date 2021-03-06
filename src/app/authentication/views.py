@@ -5,7 +5,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
-from .models import CustomUser, Employee
+from .models import CustomUser, Role
 from .serializers import AuthTokenSerializer, UserSerializer, EmployeeSerializer
 
 
@@ -35,7 +35,7 @@ class UserViewSet(ModelViewSet):
 
 
 class EmployeeViewSet(GenericViewSet):
-    queryset = Employee.objects.all()
+    queryset = CustomUser.objects.filter(role__in=[Role.EMPLOYEE, Role.MANAGER])
     serializer_class = EmployeeSerializer
 
     def get_serializer(self, *args, **kwargs):

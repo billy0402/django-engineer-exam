@@ -29,6 +29,14 @@ class CustomUser(AbstractUser):
 
     objects = CustomUserManager()
 
+    @property
+    def is_customer(self):
+        return self.role == Role.CUSTOMER and hasattr(self, 'customer')
+
+    @property
+    def is_employee(self):
+        return self.role in [Role.EMPLOYEE, Role.MANAGER] and hasattr(self, 'employee')
+
     def __str__(self):
         return self.email
 
@@ -39,7 +47,7 @@ class Customer(BaseModel):
     nick_name = models.CharField(max_length=10, null=True, blank=True)
 
     def clean(self):
-        if hasattr(self.user, 'employee'):
+        if self.user.is_employee:
             raise ValidationError(_('This user is already set as an employee.'))
 
 
@@ -49,5 +57,5 @@ class Employee(BaseModel):
     nick_name = models.CharField(max_length=10, null=True, blank=True)
 
     def clean(self):
-        if hasattr(self.user, 'customer'):
+        if self.user.is_customer:
             raise ValidationError(_('This user is already set as a customer.'))
