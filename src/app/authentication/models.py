@@ -1,10 +1,12 @@
 from uuid import uuid4
 
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import TextChoices
 from django.utils.translation import ugettext_lazy as _
 
+from utils.models import BaseModel
 from .managers import CustomUserManager
 
 
@@ -29,3 +31,21 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.email
+
+
+class Customer(BaseModel):
+    id = models.UUIDField(default=uuid4, editable=False)
+    user = models.OneToOneField('CustomUser', primary_key=True, on_delete=models.CASCADE, verbose_name='使用者')
+
+    def clean(self):
+        if hasattr(self.user, 'employee'):
+            raise ValidationError(_('This user is already set as an employee.'))
+
+
+class Employee(BaseModel):
+    id = models.UUIDField(default=uuid4, editable=False)
+    user = models.OneToOneField('CustomUser', primary_key=True, on_delete=models.CASCADE, verbose_name='使用者')
+
+    def clean(self):
+        if hasattr(self.user, 'customer'):
+            raise ValidationError(_('This user is already set as a customer.'))
