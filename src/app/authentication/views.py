@@ -42,6 +42,18 @@ class CustomerViewSet(mixins.CreateModelMixin,
     queryset = CustomUser.objects.filter(role=Role.CUSTOMER)
     serializer_class = CustomerSerializer
 
+    def get_permissions(self):
+        if self.action == 'register':
+            return AllowAny(),
+        return super().get_permissions()
+
+    @action(detail=False, methods=['post'])
+    def register(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
 
 class EmployeeViewSet(mixins.CreateModelMixin,
                       mixins.RetrieveModelMixin,
