@@ -22,6 +22,7 @@ from app.authentication import views as auth_views
 router = routers.DefaultRouter(trailing_slash=False)
 router.register('auth', auth_views.AuthViewSet, basename='auth')
 router.register('users', auth_views.UserViewSet, basename='user')
+router.register('employees', auth_views.EmployeeViewSet, basename='employee')
 
 urlpatterns = [
     path('api/', include(router.urls)),

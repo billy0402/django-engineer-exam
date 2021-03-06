@@ -2,7 +2,7 @@ from django.contrib.auth import authenticate
 from django.utils.translation import ugettext_lazy as _
 from rest_framework import serializers
 
-from .models import CustomUser
+from .models import CustomUser, Role, Employee
 
 
 class AuthTokenSerializer(serializers.Serializer):
@@ -47,3 +47,33 @@ class UserSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'password': {'write_only': True}
         }
+
+
+class EmployeeListSerializer(serializers.ListSerializer):
+    def create(self, validated_data):
+        users = []
+        for data in validated_data:
+            user = CustomUser(**data)
+            if user.password:
+                user.set_password(user.password)
+            users.append(user)
+        users = CustomUser.objects.bulk_create(users)
+
+        employees = [Employee(user=user) for user in users]
+        Employee.objects.bulk_create(employees)
+        return users
+
+
+class EmployeeSerializer(serializers.ModelSerializer):
+    def validate(self, attrs):
+        attrs['role'] = Role.EMPLOYEE
+        return super().validate(attrs)
+
+    class Meta:
+        model = CustomUser
+        fields = '__all__'
+        extra_kwargs = {
+            'password': {'write_only': True},
+            'role': {'read_only': True}
+        }
+        list_serializer_class = EmployeeListSerializer
