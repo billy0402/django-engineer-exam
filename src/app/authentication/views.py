@@ -1,4 +1,4 @@
-from rest_framework import status
+from rest_framework import status, mixins
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
 from .models import CustomUser, Role
-from .serializers import AuthTokenSerializer, UserSerializer, EmployeeSerializer
+from .serializers import AuthTokenSerializer, UserSerializer, EmployeeSerializer, CustomerSerializer
 
 
 # Create your views here.
@@ -34,7 +34,20 @@ class UserViewSet(ModelViewSet):
         return Response(serializer.data)
 
 
-class EmployeeViewSet(GenericViewSet):
+class CustomerViewSet(mixins.CreateModelMixin,
+                      mixins.RetrieveModelMixin,
+                      mixins.UpdateModelMixin,
+                      mixins.ListModelMixin,
+                      GenericViewSet):
+    queryset = CustomUser.objects.filter(role=Role.CUSTOMER)
+    serializer_class = CustomerSerializer
+
+
+class EmployeeViewSet(mixins.CreateModelMixin,
+                      mixins.RetrieveModelMixin,
+                      mixins.UpdateModelMixin,
+                      mixins.ListModelMixin,
+                      GenericViewSet):
     queryset = CustomUser.objects.filter(role__in=[Role.EMPLOYEE, Role.MANAGER])
     serializer_class = EmployeeSerializer
 

@@ -2,7 +2,7 @@ from django.contrib.auth import authenticate
 from django.utils.translation import ugettext_lazy as _
 from rest_framework import serializers
 
-from .models import CustomUser, Role, Employee
+from .models import CustomUser, Role, Employee, Customer
 
 
 class AuthTokenSerializer(serializers.Serializer):
@@ -65,6 +65,31 @@ class UserSerializer(serializers.ModelSerializer):
         }
 
 
+class CustomerSerializer(serializers.ModelSerializer):
+    def validate(self, attrs):
+        attrs['role'] = Role.CUSTOMER
+        return super().validate(attrs)
+
+    def save(self, **kwargs):
+        instance = super().save(**kwargs)
+
+        validated_data = {**self.validated_data, **kwargs}
+        if 'password' in validated_data:
+            instance.set_password(validated_data['password'])
+            instance.save()
+        Customer.objects.create(user=instance)
+
+        return instance
+
+    class Meta:
+        model = CustomUser
+        fields = '__all__'
+        extra_kwargs = {
+            'password': {'write_only': True},
+            'role': {'read_only': True}
+        }
+
+
 class EmployeeListSerializer(serializers.ListSerializer):
     def create(self, validated_data):
         users = []
@@ -84,6 +109,17 @@ class EmployeeSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         attrs['role'] = Role.EMPLOYEE
         return super().validate(attrs)
+
+    def save(self, **kwargs):
+        instance = super().save(**kwargs)
+
+        validated_data = {**self.validated_data, **kwargs}
+        if 'password' in validated_data:
+            instance.set_password(validated_data['password'])
+            instance.save()
+        Employee.objects.create(user=instance)
+
+        return instance
 
     class Meta:
         model = CustomUser
