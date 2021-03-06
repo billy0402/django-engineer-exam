@@ -1,10 +1,11 @@
 from rest_framework import status, mixins
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated, DjangoModelPermissionsOrAnonReadOnly
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
+from utils.permissions import IsAdminUser, IsEmployeeOrManagerUser
 from .models import CustomUser, Role
 from .serializers import AuthTokenSerializer, UserSerializer, EmployeeSerializer, CustomerSerializer
 
@@ -26,6 +27,7 @@ class AuthViewSet(GenericViewSet):
 class UserViewSet(ModelViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
+    permission_classes = (IsAuthenticated, IsAdminUser | IsEmployeeOrManagerUser | DjangoModelPermissionsOrAnonReadOnly)
 
     @action(detail=False)
     def me(self, request):
@@ -41,6 +43,7 @@ class CustomerViewSet(mixins.CreateModelMixin,
                       GenericViewSet):
     queryset = CustomUser.objects.filter(role=Role.CUSTOMER)
     serializer_class = CustomerSerializer
+    permission_classes = (IsAuthenticated, IsAdminUser | IsEmployeeOrManagerUser | DjangoModelPermissionsOrAnonReadOnly)
 
     def get_permissions(self):
         if self.action == 'register':
@@ -62,6 +65,7 @@ class EmployeeViewSet(mixins.CreateModelMixin,
                       GenericViewSet):
     queryset = CustomUser.objects.filter(role__in=[Role.EMPLOYEE, Role.MANAGER])
     serializer_class = EmployeeSerializer
+    permission_classes = (IsAuthenticated, IsAdminUser | IsEmployeeOrManagerUser | DjangoModelPermissionsOrAnonReadOnly)
 
     def get_serializer(self, *args, **kwargs):
         if self.action == 'import_employees':
