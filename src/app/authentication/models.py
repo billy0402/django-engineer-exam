@@ -35,7 +35,8 @@ class CustomUser(AbstractUser):
 
     @property
     def is_employee(self):
-        return self.role in [Role.EMPLOYEE, Role.MANAGER] and hasattr(self, 'employee')
+        return self.role in [Role.EMPLOYEE, Role.MANAGER] and \
+               hasattr(self, 'employee')
 
     def __str__(self):
         return self.email
@@ -43,19 +44,33 @@ class CustomUser(AbstractUser):
 
 class Customer(BaseModel):
     id = models.UUIDField(default=uuid4, editable=False)
-    user = models.OneToOneField('CustomUser', primary_key=True, on_delete=models.CASCADE, verbose_name='使用者')
+    user = models.OneToOneField(
+        'CustomUser',
+        primary_key=True,
+        on_delete=models.CASCADE,
+        verbose_name='使用者',
+    )
     nick_name = models.CharField(max_length=10, null=True, blank=True)
 
     def clean(self):
         if self.user.is_employee:
-            raise ValidationError(_('This user is already set as an employee.'))
+            raise ValidationError(
+                _('This user is already set as an employee.'),
+            )
 
 
 class Employee(BaseModel):
     id = models.UUIDField(default=uuid4, editable=False)
-    user = models.OneToOneField('CustomUser', primary_key=True, on_delete=models.CASCADE, verbose_name='使用者')
+    user = models.OneToOneField(
+        'CustomUser',
+        primary_key=True,
+        on_delete=models.CASCADE,
+        verbose_name='使用者',
+    )
     nick_name = models.CharField(max_length=10, null=True, blank=True)
 
     def clean(self):
         if self.user.is_customer:
-            raise ValidationError(_('This user is already set as a customer.'))
+            raise ValidationError(
+                _('This user is already set as a customer.'),
+            )

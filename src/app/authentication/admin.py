@@ -16,7 +16,13 @@ def download_users_csv(modeladmin, request, queryset):
     writer = csv.writer(response)
     writer.writerow(['Id', 'Role', 'Name', 'Last login', 'Date joined'])
     for user in queryset:
-        writer.writerow([user.id, user.role, user.get_full_name(), user.last_login, user.date_joined])
+        writer.writerow([
+            user.id,
+            user.role,
+            user.get_full_name(),
+            user.last_login,
+            user.date_joined,
+        ])
 
     return response
 
@@ -40,7 +46,10 @@ class CustomUserAdmin(UserAdmin):
         (None, {'fields': ('email', 'password')}),
         (_('Personal info'), {'fields': ('first_name', 'last_name')}),
         (_('Permissions'), {
-            'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions', 'role'),
+            'fields': (
+                'is_active', 'is_staff', 'is_superuser',
+                'groups', 'user_permissions', 'role'
+            ),
         }),
         (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
     )
