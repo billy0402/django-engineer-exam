@@ -6,6 +6,16 @@ from .models import CustomUser, Customer, Employee
 
 
 # Register your models here.
+class CustomerInline(admin.TabularInline):
+    model = Customer
+    extra = 0
+
+
+class EmployeeInline(admin.TabularInline):
+    model = Employee
+    extra = 0
+
+
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
     fieldsets = (
@@ -26,6 +36,7 @@ class CustomUserAdmin(UserAdmin):
     list_filter = ('is_staff', 'is_superuser', 'is_active', 'groups')
     search_fields = ('first_name', 'last_name', 'email')
     ordering = ('email',)
+    inlines = (CustomerInline, EmployeeInline)
 
 
 @admin.register(Customer)

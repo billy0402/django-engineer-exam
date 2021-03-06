@@ -36,6 +36,7 @@ class CustomUser(AbstractUser):
 class Customer(BaseModel):
     id = models.UUIDField(default=uuid4, editable=False)
     user = models.OneToOneField('CustomUser', primary_key=True, on_delete=models.CASCADE, verbose_name='使用者')
+    nick_name = models.CharField(max_length=10, null=True, blank=True)
 
     def clean(self):
         if hasattr(self.user, 'employee'):
@@ -45,6 +46,7 @@ class Customer(BaseModel):
 class Employee(BaseModel):
     id = models.UUIDField(default=uuid4, editable=False)
     user = models.OneToOneField('CustomUser', primary_key=True, on_delete=models.CASCADE, verbose_name='使用者')
+    nick_name = models.CharField(max_length=10, null=True, blank=True)
 
     def clean(self):
         if hasattr(self.user, 'customer'):
