@@ -38,6 +38,9 @@ class CustomUserAdmin(UserAdmin):
     ordering = ('email',)
     inlines = (CustomerInline, EmployeeInline)
 
+    class Media:
+        js = ('js/authentication/role.js',)
+
 
 @admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):
