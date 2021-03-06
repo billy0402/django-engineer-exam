@@ -1,11 +1,29 @@
+import csv
+
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
+from django.http import HttpResponse
 from django.utils.translation import ugettext_lazy as _
 
 from .models import CustomUser, Customer, Employee
 
 
 # Register your models here.
+def download_users_csv(modeladmin, request, queryset):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="users.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['Id', 'Role', 'Name', 'Last login', 'Date joined'])
+    for user in queryset:
+        writer.writerow([user.id, user.role, user.get_full_name(), user.last_login, user.date_joined])
+
+    return response
+
+
+download_users_csv.short_description = "Download selected users' CSV"
+
+
 class CustomerInline(admin.TabularInline):
     model = Customer
     extra = 0
@@ -37,6 +55,7 @@ class CustomUserAdmin(UserAdmin):
     search_fields = ('first_name', 'last_name', 'email')
     ordering = ('email',)
     inlines = (CustomerInline, EmployeeInline)
+    actions = (download_users_csv,)
 
     class Media:
         js = ('js/authentication/role.js',)
