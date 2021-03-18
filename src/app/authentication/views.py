@@ -1,4 +1,4 @@
-from rest_framework import status, mixins
+from rest_framework import mixins
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action
 from rest_framework.permissions import (
@@ -71,10 +71,7 @@ class CustomerViewSet(mixins.CreateModelMixin,
 
     @action(detail=False, methods=['post'])
     def register(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return super().create(request, *args, **kwargs)
 
 
 class EmployeeViewSet(mixins.CreateModelMixin,
@@ -99,8 +96,5 @@ class EmployeeViewSet(mixins.CreateModelMixin,
         return super().get_serializer(*args, **kwargs)
 
     @action(detail=False, methods=['post'], url_path='import')
-    def import_employees(self, request):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    def import_employees(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
